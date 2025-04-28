@@ -15,7 +15,7 @@ OLED_ENABLE = yes           # OLED display
 OLED_DRIVER = ssd1306
 
 # Other
-EXTRAKEY_ENABLE = no        # Audio control and System control
+EXTRAKEY_ENABLE = yes        # Audio control and System control
 CAPS_WORD_ENABLE = yes
 LAYER_LOCK_ENABLE = yes
 

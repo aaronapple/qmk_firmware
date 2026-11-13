@@ -53,6 +53,22 @@ Aaron compiled and flashed both halves and confirmed the revised keymap works
 on hardware, including the thumb timing fix, Pair Shift, and final Tab/Escape
 swap. OLED bring-up remains a separate task.
 
+### Upstream migration (2026-11-12)
+
+Aaron backed up the working UF2 in Downloads, confirmed the touchpad behaves
+as before, and pushed the baseline at `56169250fa` on `aa_lily58`.
+The migration branch `aa_lily58-upstream-2026-11-12` merges upstream master
+at `3329239097`. The sole merge conflict was in `rev1/keyboard.json`:
+retain the explicit RP2040 processor and bootloader rather than upstream's
+stock `development_board: promicro`. Matrix GPIOs, GP1 split serial,
+right-master selection, Azoteq TPS43 configuration, and I2C enablement are
+preserved. Submodules are updated to upstream's pinned revisions.
+
+The host keymap checks pass, including all 20 paired outputs. All three QMK
+tapping tests also pass with the updated submodules. Compilation and hardware
+validation of the merged firmware are still pending; the earlier successful
+build and hardware checks above describe the baseline firmware.
+
 ## Hardware and build context
 
 This checkout targets `lily58/rev1` with RP2040 controllers, a right master,
@@ -140,7 +156,7 @@ layout is separate from updating this keymap.
 
 - [x] Build and flash this fork and verify the revised keymap on the assembled
   keyboard, including thumb layers and Pair Shift.
-- [ ] Preserve a copy of the known working UF2 and explicitly verify touchpad
+- [x] Preserve a copy of the known working UF2 and explicitly verify touchpad
   operation before upstream migration.
 - [ ] After baseline verification, sync with upstream QMK on a separate
   branch and make the relevant compatibility updates. Preserve the RP2040

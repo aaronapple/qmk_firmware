@@ -44,6 +44,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define AZOTEQ_IQS5XX_TPS43
 #define MOUSE_EXTENDED_REPORT
 
+// OLED bring-up is disabled for daily use. Also enable CONSOLE_ENABLE in
+// rules.mk when re-enabling this diagnostic for communication checks.
+// #define AA_OLED_DIAGNOSTIC
+#ifdef AA_OLED_DIAGNOSTIC
+#    define OLED_TIMEOUT 0
+#endif
+
 // Thumb Layer Tap Keys
 #define LNM_TAB LT(_NUM, KC_TAB)
 #define LNV_SPC LT(_NAV, KC_SPC)

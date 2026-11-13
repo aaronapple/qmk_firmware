@@ -65,14 +65,17 @@ right-master selection, Azoteq TPS43 configuration, and I2C enablement are
 preserved. Submodules are updated to upstream's pinned revisions.
 
 The host keymap checks pass, including all 20 paired outputs. All three QMK
-tapping tests also pass with the updated submodules. Compilation and hardware
-validation of the merged firmware are still pending; the earlier successful
-build and hardware checks above describe the baseline firmware.
+tapping tests also pass with the updated submodules. Aaron ran `qmk doctor`
+and compiled without warnings or errors, flashed both halves, and reported
+that the updated firmware worked well. The tested merge, `59772b09a0`, was
+then fast-forwarded into `aa_lily58` and the migration branch was deleted.
+At this handoff, the merge has not been pushed to origin.
 
 ## Hardware and build context
 
 This checkout targets `lily58/rev1` with RP2040 controllers, a right master,
-Azoteq TPS43 touchpad, and OLED. Commit `f310a4fbd6` records the original
+Azoteq TPS43 touchpad on the right, and one OLED on the left. Commit
+`f310a4fbd6` records the original
 Holykeebs-derived hardware configuration. Preserve the local matrix pins,
 serial pin, and I2C settings when building.
 
@@ -152,19 +155,102 @@ forks and a separate userspace overlay. Their current Lily58 target is
 The guide does not specify a special compiler version. Migrating to that
 layout is separate from updating this keymap.
 
+## OLED troubleshooting handoff
+
+There is only **one OLED, on the left half**. The order confirmation lists
+0.91-inch, 128x32 resolution; the controller IC and actual wiring have not
+been confirmed. It has never visibly lit up, including before the upstream
+update. The right touchpad works, but this does not verify the left I2C bus.
+Each half drives its local peripherals; the halves communicate over serial.
+
+### What we tried
+
+1. Confirmed OLED support was already active: `OLED_ENABLE = yes`,
+   `OLED_DRIVER = ssd1306`, and the non-master rendering path calls
+   `oled_write(read_logo(), false)`. The commented-out lines are optional
+   display content, not the OLED enablement. QMK defaults to 128x32 and
+   address `0x3C`; this board configuration defaults to SDA GP2 / SCL GP3.
+2. Added `AA_OLED_DIAGNOSTIC` in `config.h`: plain text replaces the logo,
+   `OLED_TIMEOUT` is zero, and rendering calls `oled_on()`. Aaron flashed
+   both halves and reconnected USB to the right with TRRS attached. The
+   display remained completely blank, with no visible flash or pixels.
+3. Enabled `CONSOLE_ENABLE = yes` in `rules.mk` and added a diagnostic
+   `housekeeping_task_user()` in `keymap.c`. Every three seconds it writes
+   an SSD1306 NOP command to addresses `0x3C` and `0x3D` with a 20 ms timeout.
+   These are write transactions, avoiding read probes that OLEDs may not
+   support. If the configured address responds and the display is off, it
+   retries OLED initialization after power has settled.
+4. Aaron flashed the console diagnostic and connected **only the left half
+   directly by USB, with TRRS disconnected**, then ran `qmk console`.
+   The repeated output was:
+
+   ```text
+   OLED diag: master=1, SDA=GP2 SCL=GP3, 0x3C=-1 0x3D=-1, on=0
+   ```
+
+`master=1` is expected for a half connected directly by USB; `MASTER_RIGHT`
+does not prevent this diagnostic connection. Both writes returned
+`I2C_STATUS_ERROR` (-1), and `on=0` means the driver reports the display off.
+Neither tested address communicated successfully under the current settings.
+No successful initialization retry was reported. The GP2/GP3 text is a fixed
+label describing the configured defaults, not a measurement of physical
+wiring. These results do **not** establish that the module is defective or
+distinguish missing power, a connection problem, wrong pins/address, or a
+different controller. Changing display content alone has not fixed it.
+
+The host keymap regression checks still pass after both diagnostic changes.
+They do not exercise the OLED/console code; Aaron's firmware build and flash
+provided the build validation. Diagnostics have since been disabled for daily
+use: `AA_OLED_DIAGNOSTIC` is commented out and `CONSOLE_ENABLE = no`.
+Normal logo/keylog rendering and QMK's default OLED timeout are restored;
+the periodic probes and initialization retries are excluded from the build.
+The optional diagnostic code and these notes remain uncommitted. Aaron will
+recompile and flash both halves to replace the installed diagnostic firmware.
+
+### Resume here when tools are available
+
+1. Disconnect USB and leave TRRS disconnected before opening the cover or
+   touching connections. Remove the left acrylic cover and take clear photos
+   of the OLED, its connections, nearby PCB markings, and any module labels.
+   Look for GND/VCC/SCL/SDA labels, visible loose seating, and poor solder
+   joints. Do not desolder or disconnect the module just to investigate.
+2. Identify the module/controller and confirm the connection pin order and
+   the PCB/controller mapping for SDA and SCL. Compare the actual wiring to
+   GP2/GP3 before trying different GPIO settings. Verify any required PCB
+   jumpers from the matching board documentation rather than guessing.
+3. If needed, use a multimeter to check continuity with power disconnected.
+   Check supply voltage against the module specification only once the pins
+   are identified and probes can be placed safely. Do not guess the supply
+   voltage or bridge adjacent pins.
+4. Correct any confirmed configuration or connection issue and repeat the
+   isolated-left console test. A zero return code means the write succeeded.
+   If only `0x3D` succeeds, update `OLED_DISPLAY_ADDRESS` accordingly. If
+   communication succeeds but the screen stays blank, investigate the
+   controller type and initialization. If wiring and power check out but
+   communication still fails, contact Holykeebs with photos and these logs.
+5. Once the screen works, choose useful content for the **left** half. Disable
+   `AA_OLED_DIAGNOSTIC` and set `CONSOLE_ENABLE = no` after testing, then
+   rebuild and flash. While diagnostics are enabled, they keep the display
+   awake; do not leave a static test screen running indefinitely.
+
+To repeat the test, uncomment `#define AA_OLED_DIAGNOSTIC` in `config.h`,
+set `CONSOLE_ENABLE = yes` in `rules.mk`, rebuild, and flash the left half.
+Keep only that half connected by USB and run `qmk console`. Stop it with
+Ctrl+C. To resume normal keyboard use, disconnect USB, reconnect TRRS while
+both halves are unpowered, and connect USB to the right.
+
 ## Next steps
 
 - [x] Build and flash this fork and verify the revised keymap on the assembled
   keyboard, including thumb layers and Pair Shift.
 - [x] Preserve a copy of the known working UF2 and explicitly verify touchpad
   operation before upstream migration.
-- [ ] After baseline verification, sync with upstream QMK on a separate
+- [x] After baseline verification, sync with upstream QMK on a separate
   branch and make the relevant compatibility updates. Preserve the RP2040
   controller and bootloader settings, matrix pins, serial pin, and I2C
   configuration. Review upstream's `development_board` changes rather than
   accepting the stock Pro Micro configuration. Rebuild and repeat hardware
   checks before adopting the updated firmware.
-- [ ] Get the OLED screens working. OLED support is configured, but the
-  displays have not yet been brought up or verified. Check initialization,
-  I2C communication, and rendering on both halves, then choose useful
-  display content. Track this separately from baseline keymap verification.
+- [ ] Get the single left OLED working. Resume with the physical inspection
+  described in the troubleshooting handoff above, then resolve communication
+  and choose useful display content.

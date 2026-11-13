@@ -1,6 +1,34 @@
 #include QMK_KEYBOARD_H
 #include "tap_hold.h"
 
+#if defined(AA_OLED_DIAGNOSTIC) && defined(OLED_ENABLE) && defined(CONSOLE_ENABLE)
+#    include "i2c_master.h"
+#    include "print.h"
+
+void housekeeping_task_user(void) {
+  static uint32_t last_check;
+  if (timer_elapsed32(last_check) < 3000) {
+    return;
+  }
+  last_check = timer_read32();
+
+  // SSD1306 NOP command: use writes, since OLEDs may not support read probes.
+  const uint8_t nop[] = {0x00, 0xE3};
+  i2c_status_t at_3c = i2c_transmit(0x3C << 1, nop, sizeof(nop), 20);
+  i2c_status_t at_3d = i2c_transmit(0x3D << 1, nop, sizeof(nop), 20);
+  uprintf("OLED diag: master=%u, SDA=GP2 SCL=GP3, 0x3C=%d 0x3D=%d, on=%u\n",
+          (unsigned)is_keyboard_master(), (int)at_3c, (int)at_3d, (unsigned)is_oled_on());
+
+  // Retry initialization after power has settled, using the configured address.
+  if (!is_oled_on() &&
+      ((OLED_DISPLAY_ADDRESS == 0x3C && at_3c == I2C_STATUS_SUCCESS) ||
+       (OLED_DISPLAY_ADDRESS == 0x3D && at_3d == I2C_STATUS_SUCCESS))) {
+    bool initialized = oled_init(OLED_ROTATION_0);
+    uprintf("OLED diag: initialization retry=%u\n", (unsigned)initialized);
+  }
+}
+#endif
+
 enum layer_number {
   _COLEMAK = 0,
   _QWERTY = 1,
@@ -241,6 +269,14 @@ const char *read_keylogs(void);
 // const char *read_timelog(void);
 
 bool oled_task_user(void) {
+#ifdef AA_OLED_DIAGNOSTIC
+  oled_on();
+  oled_set_cursor(0, 0);
+  oled_write_ln("OLED TEST", false);
+  oled_write_ln(is_keyboard_master() ? "Role: master" : "Role: peripheral", false);
+  oled_write_ln("128x32 / I2C", false);
+  oled_write_ln("Text rendering OK", false);
+#else
   if (is_keyboard_master()) {
     // If you want to change the display of OLED, you need to change here
     // oled_write_ln(read_layer_state(), false);
@@ -252,6 +288,7 @@ bool oled_task_user(void) {
   } else {
     oled_write(read_logo(), false);
   }
+#endif
     return false;
 }
 #endif // OLED_ENABLE

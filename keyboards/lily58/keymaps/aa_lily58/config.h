@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define QUICK_TAP_TERM 0
 #define PERMISSIVE_HOLD
 #define CHORDAL_HOLD
+#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
 // Custom
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
@@ -44,8 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MOUSE_EXTENDED_REPORT
 
 // Thumb Layer Tap Keys
-#define LNM_SPC LT(_NUM, KC_SPC)
-#define LNV_ESC LT(_NAV, KC_ESC)
+#define LNM_TAB LT(_NUM, KC_TAB)
+#define LNV_SPC LT(_NAV, KC_SPC)
 #define LSM_ENT LT(_SYM, KC_ENT)
 #define LFN_BSP LT(_FUN, KC_BSPC)
 
@@ -55,21 +56,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MT_SCTL LCTL_T(KC_S)
 #define MT_TSFT LSFT_T(KC_T)
 
-#define MT_NSFT LSFT_T(KC_N)
-#define MT_ECTL LCTL_T(KC_E)
-#define MT_IALT LALT_T(KC_I)
-#define MT_OGUI LGUI_T(KC_O)
+#define MT_NSFT RSFT_T(KC_N)
+#define MT_ECTL RCTL_T(KC_E)
+#define MT_IALT RALT_T(KC_I)
+#define MT_OGUI RGUI_T(KC_O)
 
 // Home-Row Mods for QWERTY
-#define MT_AGUI LGUI_T(KC_A)
 #define MT_SALT LALT_T(KC_S)
 #define MT_DCTL LCTL_T(KC_D)
 #define MT_FSFT LSFT_T(KC_F)
 
-#define MT_JSFT LSFT_T(KC_J)
-#define MT_KCTL LCTL_T(KC_K)
-#define MT_LALT LALT_T(KC_L)
-#define MT_CGUI LGUI_T(KC_SCLN)
+#define MT_JSFT RSFT_T(KC_J)
+#define MT_KCTL RCTL_T(KC_K)
+#define MT_LALT RALT_T(KC_L)
+#define MT_CGUI RGUI_T(KC_SCLN)
 
 /*
 #undef RGBLIGHT_LED_COUNT

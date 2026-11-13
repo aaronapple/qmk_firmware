@@ -17,7 +17,7 @@ OLED_DRIVER = ssd1306
 # Other
 EXTRAKEY_ENABLE = yes        # Audio control and System control
 CAPS_WORD_ENABLE = yes
-LAYER_LOCK_ENABLE = yes
+LAYER_LOCK_ENABLE = no
 
 # Bootloader
 BOOTLOADER = rp2040

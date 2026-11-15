@@ -5,17 +5,19 @@ Kanata configuration. The Lily keeps its thumb layer taps:
 
 | Thumb | Tap | Hold |
 | --- | --- | --- |
-| Left Tab (next to Space) | Tab | Numbers |
+| Left Escape (next to Space) | Escape | Numbers |
 | Left Space | Space | Navigation |
 | Right Enter | Enter | Coding symbols |
 | Right Backspace | Backspace | Functions |
 
-The next left thumb key outward from Tab sends plain Escape.
+The next left thumb key outward from Escape sends plain Tab.
 
-On Numbers, hold the Colemak **c** position for Pair Shift. On Coding, hold
-the Colemak **comma** position. Pair Shift selects alternate punctuation without
-sending a real Shift modifier. The layer comments in `keymap.c` show the
-normal and alternate outputs. Both home-row Ctrl keys remain available.
+On Numbers, hold the Colemak **s** (left Ctrl) position for Pair Shift. On Coding,
+hold the Colemak **e** (right Ctrl) position. Pair Shift selects alternate
+punctuation without sending a real Shift modifier. The layer comments in `keymap.c` show the
+normal and alternate outputs. These positions send only Pair Shift on their
+respective layers; base-layer Ctrl behavior is unchanged. The c and comma
+positions inherit their ordinary base actions.
 Layer locking is disabled; the two outer thumb keys do nothing on utility layers.
 
 Navigation has Home/Page Down/Page Up/End above the arrows. Cut/Copy/Paste
@@ -25,12 +27,11 @@ Super+Shift+Z, matching Kanata.
 On Functions, F1–F6 run left to right across the top left row, and F7–F12
 across the second left row.
 
-Thumb layer taps activate their layer as soon as another key is pressed,
-including keys on the same hand. This lets Numbers + c Pair Shift work
-without waiting 200 ms and prevents the thumb from accidentally sending
-its tap action before c/k reaches an editor. A thumb pressed and released alone
-still sends its tap action. Home-row modifiers retain Chordal Hold and
-Permissive Hold for typing rolls.
+Tap/hold behavior uses the pre-revamp settings: a 200 ms tapping term,
+`QUICK_TAP_TERM 0`, Permissive Hold, and Chordal Hold. There are no custom
+callbacks or thumb exemptions. Same-hand chords within the tapping term follow
+QMK's default Chordal Hold rules. A thumb exemption remains an option to try
+only if hardware testing reveals a problem.
 
 ## Validation
 
@@ -38,20 +39,20 @@ Run the host regression checks with Python 3 and GCC:
 
 ```sh
 python3 keyboards/lily58/keymaps/aa_lily58/tests/run.py
-make test:aa_lily58_tap_hold
 ```
 
 The checks compile the actual keymap using QMK's keycode headers and the
 matrix from `lily58/rev1/keyboard.json`, with keyboard I/O mocked. They cover
 all paired outputs, release ordering, state reset, navigation, thumb access,
-and modifier assignments. The QMK tapping tests additionally exercise fast
-same-hand thumb chords, standalone thumb taps, and home-row typing rolls
-through QMK's actual tapping engine. They do not replace an ARM firmware build
+and modifier assignments. The separate QMK suite (`make test:aa_lily58_tap_hold`)
+covers standalone Escape thumb taps and same-hand home-row typing rolls through
+QMK's actual tapping engine. They do not replace an ARM firmware build
 or hardware checks.
 
-Aaron compiled and flashed both halves and confirmed the revised keymap works
-on hardware, including the thumb timing fix, Pair Shift, and final Tab/Escape
-swap. OLED bring-up remains a separate task.
+Aaron compiled and flashed the current layout and reported no noticeable errors
+in initial use with the Tab/Escape order, s/e Pair Shift, and restored tap/hold
+baseline. No additional timing changes are currently justified by hardware
+testing. OLED bring-up remains a separate task.
 
 ### Upstream migration (2026-11-12)
 
@@ -138,12 +139,11 @@ waiting, open it in the file manager to mount it.
 - **The assembled split is unresponsive:** power off and check that TRRS is
   fully seated at both ends. A partially inserted cable caused the connection
   problem during this session.
-- **Fast Numbers + Pair Shift sends editor commands:** thumb layers must be
-  exempt from Chordal Hold's same-hand tap rule and use hold-on-other-key-press.
-  Without this, the former Escape/Numbers thumb could send `Escape`, `c`, `k`,
-  which Neovim interprets as a change command across two lines. `tap_hold.h`
-  implements the fix for all four thumb layers while retaining the home-row
-  modifier rules.
+- **Historical fast Numbers + Pair Shift concern:** earlier notes described a
+  possible Escape/c/k sequence in Neovim and introduced immediate thumb holds
+  and a same-hand exemption. Those additions have been removed at Aaron's
+  request in favor of the original tap/hold settings. Do not assume that timing
+  changes are necessary; reproduce an actual failure before adding them back.
 - **Suspected double remapping:** the laptop's Kanata configuration explicitly
   selects its internal i8042 keyboard. It does not select the Lily58; preserve
   that device selection when changing the laptop configuration.

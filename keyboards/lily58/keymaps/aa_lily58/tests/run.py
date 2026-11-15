@@ -33,7 +33,6 @@ with tempfile.TemporaryDirectory(prefix='lily58-keymap-check-') as directory:
     #define layer_state_is(layer) ((layer_state & (1u << (layer))) != 0)
     void register_code16(uint16_t code);
     void unregister_code16(uint16_t code);
-    bool get_chordal_hold_default(keyrecord_t *tap_hold_record, keyrecord_t *other_record);
     ''' + '#define LAYOUT(' + ','.join(names) + ') ' + initializer + '\n')
     subprocess.run(
         [

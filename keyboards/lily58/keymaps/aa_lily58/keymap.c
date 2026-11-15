@@ -1,5 +1,4 @@
 #include QMK_KEYBOARD_H
-#include "tap_hold.h"
 
 #if defined(AA_OLED_DIAGNOSTIC) && defined(OLED_ENABLE) && defined(CONSOLE_ENABLE)
 #    include "i2c_master.h"
@@ -126,7 +125,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+------|
  * | MUTE |   Z  |   X  |   C  |   D  |   V  |-------|    |-------|   K  |   H  |   ,> |   .> |  /?  |  \ | |
  * `-----------------------------------------/       /     \      \-----------------------------------------'
- *                   | XXXX | ESC  | TAB  | /Space  /       \Enter \  |BackSP| DEL  | XXXX |
+ *                   | XXXX | TAB  | ESC  | /Space  /       \Enter \  |BackSP| DEL  | XXXX |
  *                   |      |      |      |/       /         \      \ |      |      |      |
  *                   `----------------------------'           '------''--------------------'
  */
@@ -136,7 +135,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,   KC_W,    KC_F,    KC_P,    KC_B,                     KC_J,    KC_L,    KC_U,    KC_Y, KC_SCLN, KC_MINS,
   KC_ESC, MT_AGUI, MT_RALT, MT_SCTL, MT_TSFT, KC_G,                     KC_M, MT_NSFT, MT_ECTL, MT_IALT, MT_OGUI, KC_QUOT,
   KC_MUTE, KC_Z,   KC_X,    KC_C,    KC_D,    KC_V, KC_LBRC,  KC_RBRC,  KC_K,    KC_H,  KC_COMM, KC_DOT, KC_SLSH, KC_BSLS,
-                        KC_NO, KC_ESC, LNM_TAB, LNV_SPC,         LSM_ENT, LFN_BSP, KC_DEL, KC_NO
+                        KC_NO, KC_TAB, LNM_ESC, LNV_SPC,         LSM_ENT, LFN_BSP, KC_DEL, KC_NO
 ),
 
 
@@ -150,7 +149,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+------|
  * | MUTE |   Z  |   X  |   C  |   V  |   B  |-------|    |-------|   N  |   M  |   ,  |   .  |   /  |  \ | |
  * `-----------------------------------------/       /     \      \-----------------------------------------'
- *                   |Colemk| ESC  | TAB  | /Space  /       \Enter \  |BackSP| DEL  |Colemk|
+ *                   |Colemk| TAB  | ESC  | /Space  /       \Enter \  |BackSP| DEL  |Colemk|
  *                   |      |      |      |/       /         \      \ |      |      |      |
  *                   `----------------------------'           '------''--------------------'
  */
@@ -160,16 +159,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   KC_MINS,
   KC_ESC, MT_AGUI, MT_SALT, MT_DCTL, MT_FSFT,  KC_G,                    KC_H, MT_JSFT, MT_KCTL, MT_LALT, MT_CGUI,   KC_QUOT,
   KC_MUTE, KC_Z,   KC_X,    KC_C,    KC_V,    KC_B, KC_LBRC,  KC_RBRC,  KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
-                        DF(0), KC_ESC, LNM_TAB, LNV_SPC,         LSM_ENT, LFN_BSP, KC_DEL, DF(0)
+                        DF(0), KC_TAB, LNM_ESC, LNV_SPC,         LSM_ENT, LFN_BSP, KC_DEL, DF(0)
 ),
 
 
 /* NUMPAD: the five right-hand Colemak columns (j l u y ; / m n e i o / k h , . /).
- * Hold the Colemak c position for Pair Shift; x/y means normal/alternate.
+ * Hold the Colemak s (left Ctrl) position for Pair Shift; x/y means normal/alternate.
  * The number row and outer punctuation keys inherit the base layout.
  *
- * Left home: A/GUI  R/Alt  S/Ctrl  T/Shift  G
- * Left bottom: Z  X  PairShift  D  V
+ * Left home: A/GUI  R/Alt  PairShift  T/Shift  G
+ * Left bottom: Z  X  C  D  V
  * Right top:     $       7       8       9       %/^
  * Right home:    0       4       5       6       +/-
  * Right bottom: ./=      1       2       3       multiply/divide
@@ -178,8 +177,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  [_NUM] = LAYOUT(
   _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______,
   _______, _______, _______, _______, _______, _______,                   KC_DLR,  KC_7,    KC_8,    KC_9,    PAIR_PERCENT_CARET, _______,
-  _______, _______, _______, _______, _______, _______,             KC_0,    KC_4,    KC_5,    KC_6,    PAIR_ADD_SUB,       _______,
-  _______, _______, _______, NUM_PAIR_SHIFT, _______, _______, _______, KC_SPC, PAIR_DECIMAL_EQUALS, KC_1, KC_2, KC_3, PAIR_MUL_DIV,    _______,
+  _______, _______, _______, NUM_PAIR_SHIFT, _______, _______,             KC_0,    KC_4,    KC_5,    KC_6,    PAIR_ADD_SUB,       _______,
+  _______, _______, _______, _______, _______, _______, _______, KC_SPC, PAIR_DECIMAL_EQUALS, KC_1, KC_2, KC_3, PAIR_MUL_DIV,    _______,
                         KC_NO, _______, _______, _______,           _______, _______, _______, KC_NO
 ),
 
@@ -204,21 +203,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
 /* SYM: the five left-hand Colemak columns (q w f p b / a r s t g / z x c d v).
- * Hold the Colemak comma position for Pair Shift; x/y means normal/alternate.
+ * Hold the Colemak e (right Ctrl) position for Pair Shift; x/y means normal/alternate.
  * The number row and outer punctuation keys inherit the base layout.
  *
  * Left top:     grave     &       |       !       ?
  * Left home:      </>    {/}     [/]     (/)      @
  * Left bottom: backslash  ~      -/_     '/"      #
- * Right home: M  N/Shift  E/Ctrl  I/Alt  O/GUI
- * Right bottom: K  H  PairShift  .  /
+ * Right home: M  N/Shift  PairShift  I/Alt  O/GUI
+ * Right bottom: K  H  ,  .  /
  * Left inner key: Enter. Both outer thumb keys are disabled.
  */
  [_SYM] = LAYOUT(
   _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______,
   _______, KC_GRV, KC_AMPR, KC_PIPE, KC_EXLM, KC_QUES,                      _______, _______, _______, _______, _______, _______,
-  _______, PAIR_ANGLE, PAIR_BRACE, PAIR_BRACKET, PAIR_PAREN, KC_AT,          _______, _______, _______, _______, _______, _______,
-  _______, KC_BSLS, KC_TILD, PAIR_DASH_UNDER, PAIR_QUOTES, KC_HASH, KC_ENT, _______, _______, _______, SYM_PAIR_SHIFT, _______, _______, _______,
+  _______, PAIR_ANGLE, PAIR_BRACE, PAIR_BRACKET, PAIR_PAREN, KC_AT,          _______, _______, SYM_PAIR_SHIFT, _______, _______, _______,
+  _______, KC_BSLS, KC_TILD, PAIR_DASH_UNDER, PAIR_QUOTES, KC_HASH, KC_ENT, _______, _______, _______, _______, _______, _______, _______,
                         KC_NO, _______, _______, _______,           _______, _______, _______, KC_NO
 ),
 

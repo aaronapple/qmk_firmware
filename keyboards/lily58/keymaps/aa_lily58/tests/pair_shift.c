@@ -8,12 +8,6 @@ static uint16_t last_pressed, last_released;
 static unsigned press_count, release_count;
 void register_code16(uint16_t code) { last_pressed = code; ++press_count; }
 void unregister_code16(uint16_t code) { last_released = code; ++release_count; }
-static bool default_chordal_hold;
-bool get_chordal_hold_default(keyrecord_t *tap_hold_record, keyrecord_t *other_record) {
-    (void)tap_hold_record;
-    (void)other_record;
-    return default_chordal_hold;
-}
 #include "../keymap.c"
 
 static bool event(uint16_t code, bool pressed) {
@@ -24,16 +18,6 @@ static void layers(layer_state_t state) {
     layer_state = layer_state_set_user(state);
 }
 int main(void) {
-    keyrecord_t record = {0};
-    const uint16_t thumbs[] = {LNM_TAB, LNV_SPC, LSM_ENT, LFN_BSP};
-    for (unsigned i = 0; i < sizeof(thumbs) / sizeof(thumbs[0]); ++i) {
-        assert(get_hold_on_other_key_press(thumbs[i], &record));
-        assert(get_chordal_hold(thumbs[i], &record, KC_C, &record));
-    }
-    assert(!get_hold_on_other_key_press(MT_SCTL, &record));
-    assert(!get_chordal_hold(MT_SCTL, &record, KC_C, &record));
-    default_chordal_hold = true;
-    assert(get_chordal_hold(MT_SCTL, &record, KC_K, &record));
     const uint16_t expected[][2] = {
         {S(KC_5), S(KC_6)}, {KC_DOT, KC_EQL}, {S(KC_EQL), KC_MINS}, {S(KC_8), KC_SLSH},
         {S(KC_COMM), S(KC_DOT)}, {S(KC_LBRC), S(KC_RBRC)}, {KC_LBRC, KC_RBRC},
@@ -97,10 +81,10 @@ int main(void) {
     assert(!num_pair_shift && !sym_pair_shift);
     assert(event(KC_1, true));
     assert(event(KC_1, false));
-    assert(keymaps[_NUM][3][3] == NUM_PAIR_SHIFT);
-    assert(keymaps[_SYM][8][3] == SYM_PAIR_SHIFT);
-    assert(keymaps[_NUM][2][3] == KC_TRNS); // Inherit left home-row Ctrl.
-    assert(keymaps[_SYM][7][3] == KC_TRNS); // Inherit right home-row Ctrl.
+    assert(keymaps[_NUM][3][3] == KC_TRNS); // Restore c.
+    assert(keymaps[_SYM][8][3] == KC_TRNS); // Restore comma.
+    assert(keymaps[_NUM][2][3] == NUM_PAIR_SHIFT); // Replace left Ctrl on Numbers.
+    assert(keymaps[_SYM][7][3] == SYM_PAIR_SHIFT); // Replace right Ctrl on Symbols.
     assert(keymaps[_COLEMAK][2][3] == LCTL_T(KC_S));
     assert(keymaps[_COLEMAK][7][3] == RCTL_T(KC_E));
     assert(keymaps[_NUM][6][5] == KC_DLR);
@@ -120,8 +104,8 @@ int main(void) {
     assert(keymaps[_NAV][5][3] == KC_TRNS);
     assert(keymaps[_NAV][5][2] == KC_TRNS);
     for (unsigned layer = _COLEMAK; layer <= _QWERTY; ++layer) {
-        assert(keymaps[layer][4][2] == KC_ESC);
-        assert(keymaps[layer][4][3] == LT(_NUM, KC_TAB));
+        assert(keymaps[layer][4][2] == KC_TAB);
+        assert(keymaps[layer][4][3] == LT(_NUM, KC_ESC));
         assert(keymaps[layer][4][4] == LT(_NAV, KC_SPC));
     }
     assert(keymaps[_COLEMAK][9][4] == LSM_ENT);
@@ -146,5 +130,5 @@ int main(void) {
     assert(MT_IALT == RALT_T(KC_I));
     assert(MT_OGUI == RGUI_T(KC_O));
     assert(press_count == release_count);
-    puts("PASS: full keymap host compilation; all 20 pair outputs; shift/layer release ordering; state isolation/reset; navigation, thumbs, disabled layer locks, Ctrl access, and function order.");
+    puts("PASS: full keymap host compilation; all 20 pair outputs; shift/layer release ordering; state isolation/reset; navigation, thumbs, disabled layer locks, base Ctrl assignments, and function order.");
 }

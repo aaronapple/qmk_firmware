@@ -8,42 +8,12 @@ using testing::InSequence;
 using testing::_;
 class Lily58TapHold : public TestFixture {};
 
-TEST_F(Lily58TapHold, FastSameHandKeyUsesThumbLayerImmediately) {
+TEST_F(Lily58TapHold, ThumbTapStillSendsEscape) {
     TestDriver driver;
     InSequence sequence;
-    auto thumb = KeymapKey(0, 0, 3, LT(1, KC_TAB));
-    auto base_c = KeymapKey(0, 2, 2, KC_C);
-    auto layer_key = KeymapKey(1, 2, 2, KC_F24);
-    set_keymap({thumb, base_c, layer_key});
-
-    EXPECT_NO_REPORT(driver);
-    thumb.press();
-    run_one_scan_loop();
-    idle_for(10);
-    VERIFY_AND_CLEAR(driver);
-
-    // No timeout or release of the second key is needed to enter the layer.
-    EXPECT_REPORT(driver, (KC_F24));
-    layer_key.press();
-    run_one_scan_loop();
-    VERIFY_AND_CLEAR(driver);
-
-    EXPECT_EMPTY_REPORT(driver);
-    layer_key.release();
-    run_one_scan_loop();
-    VERIFY_AND_CLEAR(driver);
-    EXPECT_NO_REPORT(driver);
-    thumb.release();
-    run_one_scan_loop();
-    VERIFY_AND_CLEAR(driver);
-}
-
-TEST_F(Lily58TapHold, ThumbTapStillSendsTab) {
-    TestDriver driver;
-    InSequence sequence;
-    auto thumb = KeymapKey(0, 0, 3, LT(1, KC_TAB));
+    auto thumb = KeymapKey(0, 0, 3, LT(1, KC_ESC));
     set_keymap({thumb});
-    EXPECT_REPORT(driver, (KC_TAB));
+    EXPECT_REPORT(driver, (KC_ESC));
     EXPECT_EMPTY_REPORT(driver);
     tap_key(thumb);
     VERIFY_AND_CLEAR(driver);

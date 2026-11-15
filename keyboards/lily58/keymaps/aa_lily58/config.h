@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define QUICK_TAP_TERM 0
 #define PERMISSIVE_HOLD
 #define CHORDAL_HOLD
-#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
 // Custom
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
@@ -52,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // Thumb Layer Tap Keys
-#define LNM_TAB LT(_NUM, KC_TAB)
+#define LNM_ESC LT(_NUM, KC_ESC)
 #define LNV_SPC LT(_NAV, KC_SPC)
 #define LSM_ENT LT(_SYM, KC_ENT)
 #define LFN_BSP LT(_FUN, KC_BSPC)
